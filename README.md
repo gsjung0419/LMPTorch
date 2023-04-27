@@ -8,7 +8,7 @@ HJ MYUNG@KISTI helped to make the code work with a python model pointer.
 
 0. Intro
 
- -. The codes allow LAMMPS communicate with python codes (e.g., Pytorch based NNP;torchani and ASE library for ab-initio calculations, QE,NWchem,VASP and other NNP;SchNet)
+ -. The codes allow LAMMPS communicate with python codes (e.g., Pytorch based NNP;torchani and ASE library for ab-initio calculations, QE, NWchem, VASP and other NNPs, e.g., SchNet)
 
  -. The example of TorchANI is provided (https://github.com/gsjung0419/LammpsANI)
 
@@ -28,9 +28,9 @@ HJ MYUNG@KISTI helped to make the code work with a python model pointer.
 
  -. Edit lib/python/Makefile.lammps
 
-   e.g., python_SYSINC = -I/home/8gj/anaconda3/include/python3.8
+   e.g., python_SYSINC = -I/home/$USER/anaconda3/include/python3.8
  
-   e.g., python_SYSLIB = -L/home/8gj/anaconda3/lib -lpython3.8 -lnsl -ldl -lreadline -ltermcap -lpthread -lutil -lm
+   e.g., python_SYSLIB = -L/home/$USER/anaconda3/lib -lpython3.8 -lnsl -ldl -lreadline -ltermcap -lpthread -lutil -lm
 
  -. make yes-python (in lammps/src)
 
