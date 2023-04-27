@@ -1,8 +1,8 @@
 #LMPTorch
 
-Reference: Jung, Gang Seob, Hunjoo Myung, and Stephan Irle. "Artificial Neural Network Potentials for Mechanics and Fracture Dynamics of Two-Dimensional Crystals." Machine Learning: Science and Technology (2023)
+Reference: Gang Seob Jung, Hunjoo Myung, and Stephan Irle. "Artificial Neural Network Potentials for Mechanics and Fracture Dynamics of Two-Dimensional Crystals." Machine Learning: Science and Technology (2023)
 
-GS JUNG@ORNL made the codes based on fix_python.* and fix_dftb.* (Reference: Jung, Gang Seob, Stephan Irle, and Bobby Sumpter. "Dynamic aspects of graphene deformation and fracture from approximate density functional theory." Carbon (2022)): https://github.com/gsjung0419/DFTBP
+GS JUNG@ORNL made the codes based on fix_python.* and fix_dftb.* (Reference: Gang Seob Jung, Stephan Irle, and Bobby Sumpter. "Dynamic aspects of graphene deformation and fracture from approximate density functional theory." Carbon (2022)): https://github.com/gsjung0419/DFTBP
 
 HJ MYUNG@KISTI helped to make the code work with a python model pointer. 
 
