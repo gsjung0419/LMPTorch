@@ -20,11 +20,13 @@
 #include "error.h"
 #include "lmppython.h"
 #include "python_compat.h"
+#include "python_utils.h"
 #include "update.h"
 #include "modify.h"
 #include "compute.h"
 #include "memory.h"
 #include "error.h"
+#include "utils.h"
 
 #include <iostream>
 #include <cstring>
@@ -40,9 +42,12 @@ FixPythonTorch::FixPythonTorch(LAMMPS *lmp, int narg, char **arg) :
 {
   //Initiation of local vector
   local_flag=1;
-  virial_flag=1;
+  virial_global_flag=1;
   thermo_virial=1;
+  energy_global_flag=1;
+  thermo_energy=1;
   vector_flag=1;
+  extvector=1;
   size_vector=10;
   
   vector_local = new double[10];
@@ -68,12 +73,12 @@ FixPythonTorch::FixPythonTorch(LAMMPS *lmp, int narg, char **arg) :
   }
 
   // get Python function
-  PyGILState_STATE gstate = PyGILState_Ensure();
+  PyUtils::GIL lock;
 
   PyObject * pyMain = PyImport_AddModule("__main__");
 
   if (!pyMain) {
-    PyGILState_Release(gstate);
+    PyUtils::Print_Errors();
     error->all(FLERR,"Could not initialize embedded Python");
   }
 
@@ -81,29 +86,32 @@ FixPythonTorch::FixPythonTorch(LAMMPS *lmp, int narg, char **arg) :
   pFunc = PyObject_GetAttrString(pyMain, fname);
 
   if (!pFunc) {
-    PyGILState_Release(gstate);
+    PyUtils::Print_Errors();
     error->all(FLERR,"Could not find Python function");
   }
 
   PyObject * module = PyImport_ImportModule("model");
   if (!module ){
-	PyGILState_Release(gstate);
+	PyUtils::Print_Errors();
 	error->all(FLERR,"Could not initialize embedded Python");
   }
   	pModel = PyObject_CallMethod((PyObject *)module,"Model", NULL);
   	if (!pModel) {
-    	PyGILState_Release(gstate);
+    	PyUtils::Print_Errors();
     	error->all(FLERR,"Could not find Python class, \"Model\"");
 	}
-  
 
-  PyGILState_Release(gstate);
+  lmpPtr = PyCapsule_New((void *)lmp, nullptr, nullptr);
 }
 
 /* ---------------------------------------------------------------------- */
 
 FixPythonTorch::~FixPythonTorch()
 {
+  PyUtils::GIL lock;
+  Py_CLEAR(lmpPtr);
+  Py_CLEAR(pFunc);
+  Py_CLEAR(pModel);
   delete [] vector_local;
 //std::cout<<"Torch Debug: FixPythonTorch destructor called: "<<std::endl;  
 }
@@ -117,7 +125,6 @@ int FixPythonTorch::setmask()
   //mask |= FINAL_INTEGRATE;
   mask |= PRE_REVERSE;
   mask |= POST_FORCE;
-  mask |= THERMO_ENERGY;  
   mask |= MIN_POST_FORCE;
 
   return mask;
@@ -184,18 +191,21 @@ void FixPythonTorch::post_force(int vflag)
   int eflag = eflag_caller;
   ev_init(eflag,vflag);
   
-  PyGILState_STATE gstate = PyGILState_Ensure();
+  PyUtils::GIL lock;
 
-  PyObject * ptr = PY_VOID_POINTER(lmp);
   //PyObject * arglist = Py_BuildValue("(Oi)", ptr, vflag);
-  PyObject * arglist = Py_BuildValue("(OiO)", ptr, vflag, (PyObject *)pModel); // Model object pointer is the third parameter 
+  PyObject * arglist = Py_BuildValue("(OiO)", (PyObject *)lmpPtr, vflag, (PyObject *)pModel); // Model object pointer is the third parameter
 
-  PyObject * result = PyEval_CallObject((PyObject*)pFunc, arglist);
+  PyObject * result = PyObject_CallObject((PyObject*)pFunc, arglist);
 
+  if (!result) {
+    Py_DECREF(arglist);
+    PyUtils::Print_Errors();
+    error->all(FLERR,"Fix python/torch post_force() method failed");
+  }
 
-  
+  Py_CLEAR(result);
   Py_DECREF(arglist);
-  PyGILState_Release(gstate);
 
   nnani_energy = vector_local[9];
   virial[0]=vector_local[0];

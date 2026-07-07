@@ -12,9 +12,9 @@
 ------------------------------------------------------------------------- */
 
 #ifdef FIX_CLASS
-
-FixStyle(python/torch,FixPythonTorch)
-FixStyle(python,FixPythonTorch)
+// clang-format off
+FixStyle(python/torch,FixPythonTorch);
+// clang-format on
 
 #else
 
@@ -52,6 +52,7 @@ class FixPythonTorch : public Fix {
 
  private:
   char *id_pe;
+  void * lmpPtr;
   void * pFunc;
   void * pModel;
   
