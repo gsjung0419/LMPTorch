@@ -16,34 +16,70 @@ HJ MYUNG@KISTI helped to make the code work with a python model pointer.
 
 1. Requirements
 
- -. LAMMPS 29OCT20
+ -. Recent LAMMPS with the PYTHON package
 
  -. MPI (MPICH or OPENMPI)
 
  -. mpi4py
 
-2. Installation
+2. Recent LAMMPS CMake installation
 
- -. copy the files (fix_python_torch.cpp and fix_python_torch.h) to lammps/src
+Install LMPTorch into a LAMMPS source tree:
 
- -. Edit lib/python/Makefile.lammps
+```bash
+python install_lammps_package.py /path/to/lammps
+```
 
-   e.g., python_SYSINC = -I/home/$USER/anaconda3/include/python3.8
- 
-   e.g., python_SYSLIB = -L/home/$USER/anaconda3/lib -lpython3.8 -lnsl -ldl -lreadline -ltermcap -lpthread -lutil -lm
+Open the LAMMPS CMake project with source directory `/path/to/lammps/cmake`
+and a build directory inside the LAMMPS tree. Enable:
 
- -. make yes-python (in lammps/src)
+```text
+BUILD_MPI=ON
+BUILD_SHARED_LIBS=ON
+PKG_PYTHON=ON
+PKG_LMPTORCH=ON
+```
 
- -. make mode=shared mpi (Please check whether a shared library of lammps is generated, e.g., liblammps.so)
+`PKG_LMPTORCH=ON` requires `PKG_PYTHON=ON`. CMake stops with an explicit
+error if LMPTorch is selected without the LAMMPS PYTHON package.
 
- -. make install-python
+Build and install:
+
+```bash
+cmake --build /path/to/lammps/build --parallel 8
+cmake --install /path/to/lammps/build
+```
+
+Verify the package and style:
+
+```bash
+lmp -h
+```
+
+The installed-package list must contain `LMPTORCH`, and the fix-style list
+must contain `python/torch`.
+
+The old method of copying `fix_python_torch.*` directly into `lammps/src` is
+not used for recent LAMMPS versions because it provides no `PKG_LMPTORCH`
+selection in CMake GUI.
+
+### Known issues in this package-registration baseline
+
+This revision establishes the selectable CMake package layout. The following
+runtime issues are known and are scheduled for follow-up changes:
+
+-. `nevery` is parsed but the callback currently runs every timestep.
+
+-. `end_of_step` is accepted by the command parser but is not fully dispatched.
+
+-. the legacy restart methods are incomplete and should not be relied on.
 
 
 
-3. LAMMPS 2025 status
+3. Recent LAMMPS status
 
-This branch has been updated enough to compile with LAMMPS 22Jul2025.  The
-current tested style name is:
+This package layout is tested with LAMMPS 4 Jul 2026. The source API remains
+compatible with the earlier LAMMPS 22 Jul 2025 port. The style name is:
 
 ```
 fix python/torch

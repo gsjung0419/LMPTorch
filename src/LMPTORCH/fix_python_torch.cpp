@@ -13,6 +13,7 @@
 
 /* ----------------------------------------------------------------------
    Contributing author: Richard Berger (Temple U)
+   LMPTorch integration: Gang Seob Jung
 ------------------------------------------------------------------------- */
 
 #include "fix_python_torch.h"
