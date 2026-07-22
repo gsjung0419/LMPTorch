@@ -67,6 +67,8 @@ FixPythonTorch::FixPythonTorch(LAMMPS *lmp, int narg, char **arg) :
 
   if (strcmp(arg[4],"post_force") == 0) {
     selected_callback = POST_FORCE;
+    if (nevery != 1)
+      error->all(FLERR,"Fix python/torch post_force requires nevery = 1");
   } else if (strcmp(arg[4],"end_of_step") == 0) {
     selected_callback = END_OF_STEP;
   } else {

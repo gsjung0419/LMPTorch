@@ -65,10 +65,11 @@ selection in CMake GUI.
 
 ### Known issues in this package-registration baseline
 
-This revision establishes the selectable CMake package layout. The following
-runtime issues are known and are scheduled for follow-up changes:
-
--. `nevery` is parsed but the callback currently runs every timestep.
+This revision establishes the selectable CMake package layout. ANI forces must
+be evaluated from the current coordinates on every timestep, so the
+`post_force` callback requires `nevery=1`. Other values are rejected instead
+of being silently ignored. The following runtime issues remain for follow-up
+changes:
 
 -. `end_of_step` is accepted by the command parser but is not fully dispatched.
 
